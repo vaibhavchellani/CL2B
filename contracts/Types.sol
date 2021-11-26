@@ -7,5 +7,6 @@ interface Types {
         address receiver;
         uint256 destinationChainID;
         uint256 amount;
+        uint256 transferID;
     }
 }

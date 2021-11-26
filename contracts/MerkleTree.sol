@@ -29,8 +29,6 @@ interface ERC165 {
 }
 
 interface ITree is Types {
-    event OutboundInitiated(bytes pubkey, bytes withdrawal_credentials, bytes amount, bytes signature, bytes index);
-
     function enqueueOutbound(OutboundRequest memory _request) external payable;
 
     function get_root() external view returns (bytes32);
@@ -69,20 +67,11 @@ contract MerkleTree is ITree, ERC165 {
         return to_little_endian_64(uint64(count));
     }
 
-    function enqueueOutbound(OutboundRequest memory _request) external payable override {
+    function enqueueOutbound(OutboundRequest calldata _request) external payable override {
         require(_request.amount <= type(uint64).max, "DepositContract: deposit value too high");
 
-        // Emit `DepositEvent` log
-        bytes memory amount = to_little_endian_64(uint64(_request.amount));
-        // emit DepositEvent(
-        //     pubkey,
-        //     withdrawal_credentials,
-        //     amount,
-        //     signature,
-        //     to_little_endian_64(uint64(count))
-        // );
         // Compute deposit data root (`DepositData` hash tree root)
-        bytes32 node = sha256(abi.encodePacked(uint256(0)));
+        bytes32 node = createLeafNode(_request);
 
         // Avoid overflowing the Merkle tree (and prevent edge case in computing `branch`)
         require(count < MAX_ELEMENTS_COUNT, "DepositContract: merkle tree full");
@@ -103,10 +92,27 @@ contract MerkleTree is ITree, ERC165 {
         assert(false);
     }
 
+    function createLeafNode(Types.OutboundRequest calldata _request) internal pure returns (bytes32) {
+        // TODO maybe convert amount to little endian like deposit contract did
+        return
+            bytes32(
+                sha256(
+                    abi.encode(
+                        _request.from,
+                        _request.receiver,
+                        _request.destinationChainID,
+                        _request.amount,
+                        _request.transferID
+                    )
+                )
+            );
+    }
+
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(ERC165).interfaceId || interfaceId == type(ITree).interfaceId;
     }
 
+    // TODO remove
     function to_little_endian_64(uint64 value) internal pure returns (bytes memory ret) {
         ret = new bytes(8);
         bytes8 bytesValue = bytes8(value);

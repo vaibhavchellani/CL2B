@@ -16,6 +16,8 @@ contract ERC20Bridge is Types {
     uint256 public DESTINATION_CHAIN_ID;
     MerkleTree public merkleTree;
 
+    uint256 public nextTransferID;
+
     constructor(
         address _sendingToken,
         address _destinationToken,
@@ -31,6 +33,7 @@ contract ERC20Bridge is Types {
         SOURCE_CHAIN_ID = sourceChainID;
         DESTINATION_CHAIN_ID = _destinationChainID;
         merkleTree = MerkleTree(_mt);
+        nextTransferID = 0;
     }
 
     // on the source side the user enters from here
@@ -44,7 +47,14 @@ contract ERC20Bridge is Types {
         IERC20(SENDING_TOKEN_ADDRESS).safeTransferFrom(_from, address(this), amount);
 
         // enqueueOutput
-        merkleTree.enqueueOutbound(OutboundRequest(_from, _receivingAddress, DESTINATION_CHAIN_ID, amount));
+        merkleTree.enqueueOutbound(
+            OutboundRequest(_from, _receivingAddress, DESTINATION_CHAIN_ID, amount, nextTransferID)
+        );
+
+        // increment transfer ID
+        nextTransferID++;
+
+        // TODO emit event that off-chain actors can act on
     }
 
     function recieve() external pure {}
