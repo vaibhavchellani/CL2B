@@ -71,7 +71,7 @@ contract MerkleTree is ITree, ERC165 {
         require(_request.amount <= type(uint64).max, "DepositContract: deposit value too high");
 
         // Compute deposit data root (`DepositData` hash tree root)
-        bytes32 node = createLeafNode(_request);
+        bytes32 node = createTransferHash(_request);
 
         // Avoid overflowing the Merkle tree (and prevent edge case in computing `branch`)
         require(count < MAX_ELEMENTS_COUNT, "DepositContract: merkle tree full");
@@ -92,7 +92,7 @@ contract MerkleTree is ITree, ERC165 {
         assert(false);
     }
 
-    function createLeafNode(Types.OutboundRequest calldata _request) internal pure returns (bytes32) {
+    function createTransferHash(Types.OutboundRequest calldata _request) public pure returns (bytes32) {
         // TODO maybe convert amount to little endian like deposit contract did
         return
             bytes32(

@@ -16,6 +16,8 @@ contract ERC20Bridge is Types {
     uint256 public DESTINATION_CHAIN_ID;
     MerkleTree public merkleTree;
 
+    mapping(bytes32 => address) public transferHashToOwner;
+
     uint256 public nextTransferID;
 
     constructor(
@@ -57,5 +59,19 @@ contract ERC20Bridge is Types {
         // TODO emit event that off-chain actors can act on
     }
 
+    // what to do post state root is received here
     function recieve() external pure {}
+
+    function buy(OutboundRequest calldata _request) external {
+        bytes32 transferHash = merkleTree.createTransferHash(_request);
+        require(transferHashToOwner[transferHash] == address(0), "Already bought");
+
+        // transfer the token custody from LP to user
+        IERC20(DESTINATION_TOKEN_ADDRESS).safeTransferFrom(msg.sender, _request.receiver, _request.amount);
+
+        // update owner
+        transferHashToOwner[transferHash] = msg.sender;
+
+        // TODO emit event of completion
+    }
 }
