@@ -59,8 +59,18 @@ contract ERC20Bridge is Types {
         // TODO emit event that off-chain actors can act on
     }
 
+    // need to push to destination via L1
+    function pushToDestination() external {
+        // need to write connectors that will push to other side
+    }
+
     // what to do post state root is received here
-    function recieve() external pure {}
+    function recieve() external pure {
+        // TODO do state proof validation here
+        // dependant on L2 implementation
+        // can probably build one for EVM
+        // can lookup the example in optimism's codebase
+    }
 
     function buy(OutboundRequest calldata _request) external {
         bytes32 transferHash = merkleTree.createTransferHash(_request);
@@ -73,5 +83,10 @@ contract ERC20Bridge is Types {
         transferHashToOwner[transferHash] = msg.sender;
 
         // TODO emit event of completion
+    }
+
+    // withdraw money as LP
+    function withdraw() external {
+        // need to prove that it exists in the state
     }
 }
