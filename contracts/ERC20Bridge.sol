@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.4;
+pragma solidity 0.8.4;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./interfaces/optimism/IL2ERC20Bridge.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./MerkleTree.sol";
 import "./Types.sol";
+import "./L1Router.sol";
 
 contract ERC20Bridge is Types {
     using SafeERC20 for IERC20;
@@ -15,16 +17,27 @@ contract ERC20Bridge is Types {
     uint256 public SOURCE_CHAIN_ID;
     uint256 public DESTINATION_CHAIN_ID;
     MerkleTree public merkleTree;
+    address public l1Router;
+
+    uint256 public amountOutboundEnqueued = 0;
+    uint256 public amountAwaitingClaim = 0;
 
     mapping(bytes32 => address) public transferHashToOwner;
 
     uint256 public nextTransferID;
 
+    //
+    // Optimism related vars
+    //
+    address public L2ERC20Bridge;
+
     constructor(
         address _sendingToken,
         address _destinationToken,
         uint256 _destinationChainID,
-        address _mt
+        address _l1Router,
+        address _mt,
+        address _L2ERC20Bridge
     ) {
         SENDING_TOKEN_ADDRESS = _sendingToken;
         DESTINATION_TOKEN_ADDRESS = _destinationToken;
@@ -35,6 +48,8 @@ contract ERC20Bridge is Types {
         SOURCE_CHAIN_ID = sourceChainID;
         DESTINATION_CHAIN_ID = _destinationChainID;
         merkleTree = MerkleTree(_mt);
+        l1Router = _l1Router;
+        L2ERC20Bridge = _L2ERC20Bridge;
         nextTransferID = 0;
     }
 
@@ -42,29 +57,40 @@ contract ERC20Bridge is Types {
     // lets assume its only ERC20s for now
     function send(
         address _from,
-        uint256 amount,
+        uint256 _amount,
         address _receivingAddress
     ) external {
         // transfer the token custody from user to this contract
-        IERC20(SENDING_TOKEN_ADDRESS).safeTransferFrom(_from, address(this), amount);
+        IERC20(SENDING_TOKEN_ADDRESS).safeTransferFrom(_from, address(this), _amount);
 
         // enqueueOutput
         merkleTree.enqueueOutbound(
-            OutboundRequest(_from, _receivingAddress, DESTINATION_CHAIN_ID, amount, nextTransferID)
+            OutboundRequest(_from, _receivingAddress, DESTINATION_CHAIN_ID, _amount, nextTransferID)
         );
 
         // increment transfer ID
         nextTransferID++;
+
+        amountOutboundEnqueued = amountOutboundEnqueued + _amount;
 
         // TODO emit event that off-chain actors can act on
     }
 
     // need to push to destination via L1
     function pushToDestination() external {
-        // need to write connectors that will push to other side
+        // TODO normal token withdraw on optimism
+        // The _to address should be our router contract on L1
+        IL2ERC20Bridge(L2ERC20Bridge).withdrawTo(
+            SENDING_TOKEN_ADDRESS,
+            l1Router,
+            amountOutboundEnqueued,
+            111111,
+            abi.encodePacked(merkleTree.get_root())
+        );
     }
 
     // what to do post state root is received here
+    // TODO receives L1 blockhash + tokens
     function recieve() external pure {
         // TODO do state proof validation here
         // dependant on L2 implementation
@@ -87,6 +113,10 @@ contract ERC20Bridge is Types {
 
     // withdraw money as LP
     function withdraw() external {
-        // need to prove that it exists in the state
+        // TODO need to prove that it exists in the state
+        // 1. need to find L2 state root from L1 state root
+        // 2. need to find app level merkle root from L2 state root
+        // 3. update validatedRoots
+        // 4. claim by LPer
     }
 }

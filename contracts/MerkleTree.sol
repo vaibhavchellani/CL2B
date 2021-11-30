@@ -13,7 +13,7 @@
 
 // SPDX-License-Identifier: CC0-1.0
 
-pragma solidity >=0.8.4;
+pragma solidity 0.8.4;
 
 import "./Types.sol";
 
@@ -91,6 +91,9 @@ contract MerkleTree is ITree, ERC165 {
         // this code should be unreachable. We assert `false` just to be safe.
         assert(false);
     }
+
+    // TODO fill
+    function verifyProof() external pure {}
 
     function createTransferHash(Types.OutboundRequest calldata _request) public pure returns (bytes32) {
         // TODO maybe convert amount to little endian like deposit contract did
