@@ -14,6 +14,11 @@ import { NetworkUserConfig } from "hardhat/types";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
+const isOptimizerEnabled: boolean = true;
+// 50k for normal, 1 for Optimism
+// const numOptimizerRuns: number = 1
+const numOptimizerRuns: number = 50000;
+
 const chainIds = {
   goerli: 5,
   hardhat: 31337,
@@ -76,20 +81,26 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.4",
-    settings: {
-      metadata: {
-        // Not including the metadata hash
-        // https://github.com/paulrberg/solidity-template/issues/31
-        bytecodeHash: "none",
+    compilers: [
+      {
+        settings: {
+          optimizer: {
+            enabled: isOptimizerEnabled,
+            runs: numOptimizerRuns,
+          },
+        },
+        version: "0.7.3",
       },
-      // Disable the optimizer when debugging
-      // https://hardhat.org/hardhat-network/#solidity-optimizer-support
-      optimizer: {
-        enabled: false,
-        runs: 800,
+      {
+        settings: {
+          optimizer: {
+            enabled: isOptimizerEnabled,
+            runs: numOptimizerRuns,
+          },
+        },
+        version: "0.8.4",
       },
-    },
+    ],
   },
   typechain: {
     outDir: "src/types",
