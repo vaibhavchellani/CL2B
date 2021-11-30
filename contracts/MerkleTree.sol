@@ -15,7 +15,7 @@
 
 pragma solidity 0.8.4;
 
-import "./Types.sol";
+import "./interfaces/Types.sol";
 
 // Based on official specification in https://eips.ethereum.org/EIPS/eip-165
 interface ERC165 {

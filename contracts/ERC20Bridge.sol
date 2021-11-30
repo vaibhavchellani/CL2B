@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/optimism/IL2ERC20Bridge.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./MerkleTree.sol";
-import "./Types.sol";
+import "./interfaces/Types.sol";
 import "./L1Router.sol";
 
 contract ERC20Bridge is Types {
