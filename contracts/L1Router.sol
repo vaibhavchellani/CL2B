@@ -13,9 +13,15 @@ contract L1Router {
     address public L1Token;
     address public L1ERC20TokenBridge;
 
-    constructor(address _l1Token, address _L1ERC20OptimismBridge) {
+    constructor(
+        address _l1Token,
+        address _L1ERC20OptimismBridge,
+        address _fxRoot
+    ) {
         L1Token = _l1Token;
         L1ERC20TokenBridge = _L1ERC20OptimismBridge;
+
+        // TODO create fxRoot obj
     }
 
     // TODO add auth for who can modify it
@@ -46,6 +52,11 @@ contract L1Router {
             _amount,
             _data
         );
+
+        // TODO push to destination
+
+        // https://docs.polygon.technology/docs/develop/l1-l2-communication/fx-portal/
+        // https://github.com/fx-portal/contracts/blob/main/contracts/examples/erc20-transfer/FxERC20RootTunnel.sol#L71
     }
 
     function checkIfFinalised() external {}

@@ -9,7 +9,7 @@ import "./MerkleTree.sol";
 import "./interfaces/Types.sol";
 import "./L1Router.sol";
 
-contract ERC20Bridge is Types {
+contract ERC20Gateway is Types {
     using SafeERC20 for IERC20;
 
     address public immutable SENDING_TOKEN_ADDRESS;
@@ -84,7 +84,7 @@ contract ERC20Bridge is Types {
             SENDING_TOKEN_ADDRESS,
             l1Router,
             amountOutboundEnqueued,
-            111111,
+            2000000,
             abi.encodePacked(merkleTree.get_root())
         );
     }

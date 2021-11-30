@@ -60,12 +60,14 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic,
       },
-      chainId: chainIds.hardhat,
     },
-    goerli: getChainConfig("goerli"),
-    kovan: getChainConfig("kovan"),
-    rinkeby: getChainConfig("rinkeby"),
-    ropsten: getChainConfig("ropsten"),
+    optimism: {
+      url: "http://127.0.0.1:8545",
+      accounts: {
+        mnemonic: "test test test test test test test test test test test junk",
+      },
+      gasPrice: 0,
+    },
   },
   paths: {
     artifacts: "./artifacts",
@@ -84,7 +86,7 @@ const config: HardhatUserConfig = {
       // Disable the optimizer when debugging
       // https://hardhat.org/hardhat-network/#solidity-optimizer-support
       optimizer: {
-        enabled: true,
+        enabled: false,
         runs: 800,
       },
     },
