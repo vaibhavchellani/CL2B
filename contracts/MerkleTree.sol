@@ -92,8 +92,32 @@ contract MerkleTree is ITree, ERC165 {
         assert(false);
     }
 
-    // TODO fill
-    function verifyProof() external pure {}
+    function computeRoot(
+        bytes32 leafInput,
+        uint256 path,
+        bytes32[] memory witness
+    ) internal pure returns (bytes32) {
+        // Copy to avoid assigning to the function parameter.
+        bytes32 leaf = leafInput;
+        for (uint256 i = 0; i < witness.length; i++) {
+            // get i-th bit from right
+            if (((path >> i) & 1) == 0) {
+                leaf = keccak256(abi.encode(leaf, witness[i]));
+            } else {
+                leaf = keccak256(abi.encode(witness[i], leaf));
+            }
+        }
+        return leaf;
+    }
+
+    function verify(
+        bytes32 root,
+        bytes32 leaf,
+        uint256 path,
+        bytes32[] memory witness
+    ) external pure returns (bool) {
+        return computeRoot(leaf, path, witness) == root;
+    }
 
     function createTransferHash(Types.OutboundRequest calldata _request) public pure returns (bytes32) {
         // TODO maybe convert amount to little endian like deposit contract did

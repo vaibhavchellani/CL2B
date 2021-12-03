@@ -23,6 +23,7 @@ contract ERC20Gateway is Types {
     uint256 public amountAwaitingClaim = 0;
 
     mapping(bytes32 => address) public transferHashToOwner;
+    mapping(bytes32 => bool) public validatedRoots;
 
     uint256 public nextTransferID;
 
@@ -89,13 +90,16 @@ contract ERC20Gateway is Types {
         );
     }
 
-    // what to do post state root is received here
-    // TODO receives L1 blockhash + tokens
-    function recieve() external pure {
+    function recieve(bytes32 _root) external {
         // TODO do state proof validation here
         // dependant on L2 implementation
         // can probably build one for EVM
         // can lookup the example in optimism's codebase
+
+        // TODO make sure only L2 polygon connector can call this func
+
+        // set state root
+        validatedRoots[_root] = true;
     }
 
     function buy(OutboundRequest calldata _request) external {
@@ -112,11 +116,9 @@ contract ERC20Gateway is Types {
     }
 
     // withdraw money as LP
-    function withdraw() external {
+    function withdraw(bytes32 _root) external {
         // TODO need to prove that it exists in the state
-        // 1. need to find L2 state root from L1 state root
-        // 2. need to find app level merkle root from L2 state root
-        // 3. update validatedRoots
-        // 4. claim by LPer
+        // need to prove the trasnferID is present in the validated root
+        require(validatedRoots[_root], "Invalid root");
     }
 }
