@@ -91,13 +91,6 @@ contract ERC20Gateway is Types {
     }
 
     function recieve(bytes32 _root) external {
-        // TODO do state proof validation here
-        // dependant on L2 implementation
-        // can probably build one for EVM
-        // can lookup the example in optimism's codebase
-
-        // TODO make sure only L2 polygon connector can call this func
-
         // set state root
         validatedRoots[_root] = true;
     }

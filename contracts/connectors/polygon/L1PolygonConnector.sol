@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity >=0.8.4;
 
-import { FxBaseRootTunnel } from "./FxBaseRootTunnel.sol";
+import { FxBaseRootTunnel } from "./tunnel/FxBaseRootTunnel.sol";
 
 contract L1PolygonConnector is FxBaseRootTunnel {
     constructor(address _checkpointManager, address _fxRoot) FxBaseRootTunnel(_checkpointManager, _fxRoot) {}

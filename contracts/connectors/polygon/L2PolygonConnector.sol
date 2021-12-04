@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity >=0.8.4;
 
-import { FxBaseChildTunnel } from "./FxBaseChildTunnel.sol";
+import { FxBaseChildTunnel } from "./tunnel/FxBaseChildTunnel.sol";
 import { ERC20Gateway } from "../../ERC20Gateway.sol";
 
 contract L2PolygonConnector is FxBaseChildTunnel {
