@@ -116,9 +116,15 @@ contract ERC20Gateway is Types {
     }
 
     // withdraw money as LP
-    function withdraw(bytes32 _root) external {
-        // TODO need to prove that it exists in the state
-        // need to prove the trasnferID is present in the validated root
+    function withdraw(
+        bytes32 _root,
+        OutboundRequest calldata _request,
+        uint256 path,
+        bytes32[] memory witness
+    ) external {
         require(validatedRoots[_root], "Invalid root");
+        bytes32 transferHash = merkleTree.createTransferHash(_request);
+        require(merkleTree.verify(_root, transferHash, path, witness), "Invalid Proof");
+        IERC20(DESTINATION_TOKEN_ADDRESS).safeTransfer(transferHashToOwner[transferHash], _request.amount);
     }
 }
