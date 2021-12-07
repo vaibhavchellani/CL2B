@@ -32,6 +32,12 @@ contract ERC20Gateway is Types {
     //
     address public L2ERC20Bridge;
 
+    //
+    // EVENTS
+    //
+
+    event TransferInitiated(uint256 _transferID, uint256 _amount);
+
     constructor(
         address _sendingToken,
         address _destinationToken,
@@ -64,9 +70,11 @@ contract ERC20Gateway is Types {
         // transfer the token custody from user to this contract
         IERC20(SENDING_TOKEN_ADDRESS).safeTransferFrom(_from, address(this), _amount);
 
+        uint256 currentTransferID = nextTransferID;
+
         // enqueueOutput
         merkleTree.enqueueOutbound(
-            OutboundRequest(_from, _receivingAddress, DESTINATION_CHAIN_ID, _amount, nextTransferID)
+            OutboundRequest(_from, _receivingAddress, DESTINATION_CHAIN_ID, _amount, currentTransferID)
         );
 
         // increment transfer ID
@@ -75,6 +83,7 @@ contract ERC20Gateway is Types {
         amountOutboundEnqueued = amountOutboundEnqueued + _amount;
 
         // TODO emit event that off-chain actors can act on
+        emit TransferInitiated(currentTransferID, _amount);
     }
 
     // need to push to destination via L1
