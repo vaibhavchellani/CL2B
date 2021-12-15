@@ -1,9 +1,7 @@
 import { expect, assert } from "chai";
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import { MerkleTree, MerkleTree__factory } from "../src/types";
 import { OutboundRequestStruct } from "../src/types/ITree";
-import { Contract } from "ethers";
-import { encode } from "punycode";
 
 describe("deploy gateway and erc20s", () => {
   const TREE_DEPTH = 32;

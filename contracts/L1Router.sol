@@ -59,6 +59,7 @@ contract L1Router {
         uint256 _sendingChainID,
         uint256 _destinationChainID
     ) external {
+        // finalise withdraw of tokens from optimism
         IL1ERC20Bridge(L1ERC20TokenBridge).finalizeERC20Withdrawal(
             L1Token,
             tokenByChainID[_sendingChainID],
@@ -68,7 +69,9 @@ contract L1Router {
             _data
         );
 
+        // if the destination chain is polygon, push the new state root to polygon
         if (_destinationChainID == 137) {
+            // deposit tokens to the l2 contract
             IERC20(L1Token).allowance(address(this), l1Erc20Predicate);
             rootchainManager.depositFor(gatewayByChainID[_destinationChainID], L1Token, abi.encodePacked(_amount));
 
